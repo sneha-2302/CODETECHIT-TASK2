@@ -1,0 +1,90 @@
+CREATE TABLE Rooms (
+    RoomID INT PRIMARY KEY AUTO_INCREMENT,
+    RoomNumber VARCHAR(10) UNIQUE NOT NULL,
+    RoomType VARCHAR(50) NOT NULL,
+    PricePerNight DECIMAL(10, 2) NOT NULL,
+    Availability VARCHAR(20) NOT NULL
+);
+
+CREATE TABLE Customers (
+    CustomerID INT PRIMARY KEY AUTO_INCREMENT,
+    FirstName VARCHAR(50) NOT NULL,
+    LastName VARCHAR(50) NOT NULL,
+    Email VARCHAR(100) UNIQUE NOT NULL,
+    Phone VARCHAR(20),
+    Address VARCHAR(255)
+);
+
+CREATE TABLE Reservations (
+    ReservationID INT PRIMARY KEY AUTO_INCREMENT,
+    CustomerID INT NOT NULL,
+    RoomID INT NOT NULL,
+    CheckInDate DATE NOT NULL,
+    CheckOutDate DATE NOT NULL,
+    TotalAmount DECIMAL(10, 2) NOT NULL,
+    FOREIGN KEY (CustomerID) REFERENCES Customers(CustomerID),
+    FOREIGN KEY (RoomID) REFERENCES Rooms(RoomID)
+);
+DROP TABLE PAYMENTS;
+
+CREATE TABLE Payments (
+    PaymentID INT PRIMARY KEY AUTO_INCREMENT,
+    ReservationID INT NOT NULL,
+    PaymentDate DATE NOT NULL,
+    Amount DECIMAL(10, 2) NOT NULL,
+    PaymentMethod VARCHAR(50) NOT NULL,
+    FOREIGN KEY (ReservationID) REFERENCES Reservations(ReservationID)
+);
+
+INSERT INTO Rooms (RoomNumber, RoomType, PricePerNight, Availability)
+VALUES ('101', 'Single', 100.00, 'Available');
+
+
+INSERT INTO Customers (FirstName, LastName, Email, Phone, Address)
+VALUES ('Jane', 'Doe', 'jane.doe@example.com', '123-456-7890', '456 Elm St, Anytown, USA');
+
+
+INSERT INTO Reservations (CustomerID, RoomID, CheckInDate, CheckOutDate, TotalAmount)
+VALUES (1, 1, '2024-07-01', '2024-07-05', 400.00);
+
+-- Assuming the room is now occupied
+UPDATE Rooms
+SET Availability = 'Occupied'
+WHERE RoomID = 1;
+
+INSERT INTO Payments (ReservationID, PaymentDate, Amount, PaymentMethod)
+VALUES (1, '2024-07-01', 400.00, 'Credit Card');
+
+
+UPDATE Rooms
+SET Availability = 'Available'
+WHERE RoomID = 1;
+
+SELECT Reservations.ReservationID, Reservations.CheckInDate, Reservations.CheckOutDate, Reservations.TotalAmount
+FROM Reservations
+JOIN Customers ON Reservations.CustomerID = Customers.CustomerID
+WHERE Customers.CustomerID = 1;
+
+SELECT Reservations.ReservationID, Customers.FirstName, Customers.LastName, Rooms.RoomNumber, Reservations.CheckInDate, Reservations.CheckOutDate, Reservations.TotalAmount
+FROM Reservations
+JOIN Customers ON Reservations.CustomerID = Customers.CustomerID
+JOIN Rooms ON Reservations.RoomID = Rooms.RoomID
+WHERE Reservations.ReservationID = 1;
+
+
+SELECT RoomID, RoomNumber, RoomType, PricePerNight
+FROM Rooms
+WHERE Availability = 'Available';
+
+
+SELECT SUM(TotalAmount) AS TotalRevenue
+FROM Reservations
+WHERE CheckInDate BETWEEN '2024-07-01' AND '2024-07-31';
+
+
+SELECT Payments.PaymentID, Payments.PaymentDate, Payments.Amount, Payments.PaymentMethod
+FROM Payments
+WHERE Payments.ReservationID = 1;
+
+
+
